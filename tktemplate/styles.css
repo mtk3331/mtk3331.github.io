@@ -1,0 +1,27 @@
+.canvas-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--pico-muted-border-color);
+  background-color: #eee;
+}
+
+canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.inputs-grid input {
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
