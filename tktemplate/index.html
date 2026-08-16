@@ -3,42 +3,181 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>画像ジェネレーター</title>
+  <title>簡易プロフメーカー</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="styles.css">
-  <!-- Google Fonts 例 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Kiwi+Maru:wght@500&family=M+PLUS+Rounded+1c:wght@700&family=Noto+Sans+JP:wght@700&family=Zen+Kaku+Gothic+New:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <main class="container">
-    <h2>画像ジェネレーター</h2>
-    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2>簡易プロフメーカー by tk*template</h2>
+      <button id="openHelpBtn" type="button" class="outline" style="width: auto;">使い方・説明</button>
+    </div>
+
+    <!-- 説明ダイアログ（モーダル） -->
+    <dialog id="helpDialog">
+      <article>
+        <header>
+          <h3>使い方・説明</h3>
+          <button id="closeHelpBtnTop" aria-label="Close" rel="prev"></button>
+        </header>
+
+        <section>
+          <h4>概要</h4>
+          <p><a href="https://tktemplate.tumblr.com/" target="_blank">tk*template</a>(テンプレート置き場)にて配布している個人で作成したテンプレートに対して、入力などを行い、ダウンロードできるツールです。</p>
+
+          <h4>操作方法</h4>
+          <ol>
+            <li>ドロップダウンから対象のレイアウトとデザインを選択します。</li>
+            <li>テキスト、各種チェック項目、スライダー、〇△×を入力・選択します。</li>
+            <li>右側のプレビュー領域で、配置された文字やマーク、追加画像を直接ドラッグして位置を微調整します。</li>
+            <li>「画像をダウンロード (PNG)」ボタンを押して完成画像を保存します。</li>
+          </ol>
+
+          <h4>本ツールについて</h4>
+          <ul>
+            <li>本ツールは個人が趣味で開発・公開している非公式のWebツールです。</li>
+            <li>プロフィール画像の入力をWeb上でも手軽にできるようにと、作ってみました。</li>
+          </ul>
+
+          <h4>データとプライバシー</h4>
+          <ul>
+            <li>入力されたテキストやアップロードされた画像データは、すべてお使いのブラウザ上でのみ処理されます。外部サーバーへの送信・保存は一切行われません。</li>
+            <li>設定データの保存機能（LocalStorage）はお使いのブラウザ内にのみ記録されます。</li>
+          </ul>
+
+          <h4>動作環境</h4>
+          <ul>
+            <li>PCの主要ブラウザ（Google Chrome, Microsoft Edge, Firefox, Safari 等）での利用を推奨します。</li>
+            <li>スマートフォンやタブレットなどのタッチ操作では、ドラッグ移動が正常に動作しない場合があります。</li>
+          </ul>
+
+          <hr>
+
+          <h4>免責事項</h4>
+          <ul>
+            <li>本ツールの利用により生じた直接的・間接的な損害やトラブルについて、制作者は一切の責任を負いません。自己責任にて、ご利用ください。</li>
+            <li>アップロードする画像や作成した画像の著作権、肖像権、商標権等は、利用者の責任において確認・管理してください。</li>
+          </ul>
+
+          <hr>
+
+          <h4>報告・質問等</h4>
+          <ul>
+            <li>ていか<a href="https://x.com/mtkflyer" target="_blank">@mtkflyer</a>まで、お知らせください。</li>
+            <li>配布しているテンプレートにおいては、配布場所の<a href="https://tktemplate.tumblr.com/first" target="_blank">はじめに</a>をご覧ください。</li>
+          </ul>
+
+        </section>
+
+        <footer>
+          <button id="closeHelpBtn" type="button">閉じる</button>
+        </footer>
+      </article>
+    </dialog>
+
     <div class="grid">
       <!-- 操作パネル -->
       <section>
-        <label for="layoutSelect">レイアウト選択</label>
+
+        <label for="layoutSelect">レイアウト</label>
         <select id="layoutSelect"></select>
 
-        <label for="colorSelect">カラーパターン選択</label>
-        <select id="colorSelect"></select>
+        <label for="designSelect">デザイン</label>
+        <select id="designSelect"></select>
 
-        <details open>
-          <summary>テキスト入力（30箇所）</summary>
-          <div id="textInputsContainer" class="inputs-grid"></div>
+        <details>
+          <summary>色・フォント</summary>
+          <div>
+            <label for="markColorInput">フォント色</label>
+            <input type="color" id="markColorInput" value="#000000">
+            
+            <label for="baseFontSelect">全体フォント</label>
+            <select id="baseFontSelect"></select>
+          </div>
         </details>
 
-        <button id="downloadBtn" type="button">画像をダウンロード (PNG)</button>
+        <!-- テキスト入力（10箇所） -->
+        <details>
+          <summary>テキスト入力</summary>
+          <div id="textInputsContainer"></div>
+        </details>
+
+        <!-- パターン①: 5×5のマトリクス -->
+        <details>
+          <summary>チェックリスト</summary>
+          <div id="pattern1Container" class="p1-grid"></div>
+        </details>
+
+        <!-- パターン②: スライダー4項目 -->
+        <details>
+          <summary>スライダー項目</summary>
+          <div id="pattern2Container"></div>
+        </details>
+
+        <!-- パターン④: 記号選択8項目 -->
+        <details>
+          <summary>〇/△/×入力</summary>
+          <div id="pattern4Container"></div>
+        </details>
+
+        <details>
+          <summary>メイン画像</summary>
+          <div>
+            <label id="userImageLabel" for="userImageInput">画像の選択 (1枚)</label>
+            <input type="file" id="userImageInput" accept="image/*">
+
+            <label for="userImageScaleInput">画像のサイズ (%)</label>
+            <input type="number" id="userImageScaleInput" value="100" min="10" max="500" step="5">
+          </div>
+        </details>
+
+        <!-- index.html の操作パネル内に追加 -->
+        <details>
+          <summary>データの保存・読み込み</summary>
+          <div>
+            <label for="downloadBtn">ダウンロード</label>
+            <button id="downloadBtn" type="button">画像をダウンロード (PNG)</button>
+            <!-- <button id="exportCoordsBtn" type="button" class="secondary">座標データをコピー</button> -->
+          </div>
+
+          <div class="save-load-controls">
+            <div style="margin-bottom: 0.5rem;">
+              <label for="saveNameInput">新規保存（画像は保存されません）</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="saveNameInput" placeholder="保存名を入力" style="margin-bottom: 0;">
+                <button id="saveDataBtn" type="button" style="white-space: nowrap;">新規保存</button>
+              </div>
+            </div>
+
+            <div>
+              <label for="savedDataSelect">保存済みデータ</label>
+              <select id="savedDataSelect" style="margin-bottom: 0.5rem;">
+                <option value="">-- 保存済みデータを選択 --</option>
+              </select>
+              <div style="display: flex; gap: 0.5rem;">
+                <button id="loadDataBtn" type="button" class="secondary" style="flex: 1;">呼び出し</button>
+                <button id="overwriteBtn" type="button" class="contrast" style="flex: 1;">上書き</button>
+                <button id="deleteBtn" type="button" class="outline contrast" style="flex: 1;">削除</button>
+              </div>
+            </div>
+          </div>
+        </details>
+
       </section>
+
 
       <!-- プレビュー表示 -->
       <section>
-        <label>プレビュー</label>
+        <label>プレビュー（ドラッグで位置を調整できます）</label>
         <div class="canvas-wrapper">
           <canvas id="previewCanvas" width="800" height="600"></canvas>
         </div>
       </section>
+
     </div>
   </main>
 
