@@ -1,4 +1,4 @@
-import { layouts, colors } from './data.js';
+import { layouts } from './data.js';
 
 class ImageGenerator {
   constructor() {
@@ -6,24 +6,25 @@ class ImageGenerator {
     this.ctx = this.canvas.getContext('2d');
     
     this.layoutSelect = document.getElementById('layoutSelect');
-    this.colorSelect = document.getElementById('colorSelect');
     this.inputsContainer = document.getElementById('textInputsContainer');
     this.downloadBtn = document.getElementById('downloadBtn');
 
-    // 30箇所のテキスト初期値
+    // 画像キャッシュ用
+    this.imageCache = {};
     this.textValues = Array.from({ length: 30 }, (_, i) => `Sample ${i + 1}`);
 
     this.init();
   }
 
   async init() {
-    // Webフォントのロード完了を待機
     await document.fonts.load('18px "Noto Sans JP"');
 
     this.setupSelectOptions();
     this.setupTextInputs();
     this.attachEvents();
-    this.render();
+    
+    // 初回描画
+    await this.render();
   }
 
   setupSelectOptions() {
@@ -33,13 +34,12 @@ class ImageGenerator {
       opt.textContent = layout.name;
       this.layoutSelect.appendChild(opt);
     });
-
-    colors.forEach((color, index) => {
-      const opt = document.createElement('option');
-      opt.value = index;
-      opt.textContent = color.name;
-      this.colorSelect.appendChild(opt);
-    });
+    
+    // カラー選択のセレクトボックスがHTMLに残っている場合は非表示にするか削除します
+    const colorSelectLabel = document.querySelector('label[for="colorSelect"]');
+    const colorSelect = document.getElementById('colorSelect');
+    if (colorSelectLabel) colorSelectLabel.style.display = 'none';
+    if (colorSelect) colorSelect.style.display = 'none';
   }
 
   setupTextInputs() {
@@ -60,37 +60,60 @@ class ImageGenerator {
 
   attachEvents() {
     this.layoutSelect.addEventListener('change', () => this.render());
-    this.colorSelect.addEventListener('change', () => this.render());
     this.downloadBtn.addEventListener('click', () => this.downloadImage());
   }
 
-  render() {
+  // 画像をロードするヘルパー関数
+  loadImage(src) {
+    if (this.imageCache[src]) {
+      return Promise.resolve(this.imageCache[src]);
+    }
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        this.imageCache[src] = img;
+        resolve(img);
+      };
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  async render() {
     const layout = layouts[this.layoutSelect.value];
-    const color = colors[this.colorSelect.value];
 
-    // 1. 背景描画
-    this.ctx.fillStyle = color.bg;
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    try {
+      // 1. 背景画像の読み込みと描画
+      const img = await this.loadImage(layout.imagePath);
+      
+      // 画像サイズに合わせてCanvasの幅・高さを自動調整（固定したい場合はここを変更）
+      this.canvas.width = img.naturalWidth || 800;
+      this.canvas.height = img.naturalHeight || 600;
 
-    // 2. テキスト描画 (30箇所)
-    this.ctx.fillStyle = color.text;
-    this.ctx.font = '18px "Noto Sans JP", sans-serif';
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.drawImage(img, 0, 0);
 
-    layout.textPositions.forEach((pos, index) => {
-      const text = this.textValues[index] || '';
-      this.ctx.textAlign = pos.align || 'left';
-      this.ctx.fillText(text, pos.x, pos.y);
-    });
+      // 2. テキスト描画 (30箇所)
+      this.ctx.font = '18px "Noto Sans JP", sans-serif';
 
-    // 3. 丸囲み描画
-    this.ctx.strokeStyle = color.circle;
-    this.ctx.lineWidth = 3;
-    
-    layout.circles.forEach(circle => {
-      this.ctx.beginPath();
-      this.ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
-      this.ctx.stroke();
-    });
+      layout.textPositions.forEach((pos, index) => {
+        const text = this.textValues[index] || '';
+        this.ctx.fillStyle = pos.color || '#000000';
+        this.ctx.textAlign = pos.align || 'left';
+        this.ctx.fillText(text, pos.x, pos.y);
+      });
+
+      // 3. 丸囲み描画
+      this.ctx.lineWidth = 3;
+      layout.circles.forEach(circle => {
+        this.ctx.strokeStyle = circle.color || '#FF0000';
+        this.ctx.beginPath();
+        this.ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+        this.ctx.stroke();
+      });
+    } catch (error) {
+      console.error('画像の読み込みに失敗しました:', error);
+    }
   }
 
   downloadImage() {
