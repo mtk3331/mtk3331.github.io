@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>画像ジェネレーター</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Google Fonts 例 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <main class="container">
+    <h2>画像ジェネレーター</h2>
+    
+    <div class="grid">
+      <!-- 操作パネル -->
+      <section>
+        <label for="layoutSelect">レイアウト選択</label>
+        <select id="layoutSelect"></select>
+
+        <label for="colorSelect">カラーパターン選択</label>
+        <select id="colorSelect"></select>
+
+        <details open>
+          <summary>テキスト入力（30箇所）</summary>
+          <div id="textInputsContainer" class="inputs-grid"></div>
+        </details>
+
+        <button id="downloadBtn" type="button">画像をダウンロード (PNG)</button>
+      </section>
+
+      <!-- プレビュー表示 -->
+      <section>
+        <label>プレビュー</label>
+        <div class="canvas-wrapper">
+          <canvas id="previewCanvas" width="800" height="600"></canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
