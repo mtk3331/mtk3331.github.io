@@ -707,19 +707,34 @@ getSelectedPosition() {
     }
   }
 
+// 位置調整パネルの数値反映と状態切り替え
   updatePosControlUI() {
     if (!this.posControlPanel) return;
     const pos = this.getSelectedPosition();
+    const dpadButtons = [this.btnUp, this.btnDown, this.btnLeft, this.btnRight];
+    
     if (pos) {
-      this.posControlPanel.style.display = 'block';
-      if (this.posXInput && document.activeElement !== this.posXInput) {
-        this.posXInput.value = pos.x;
+      // 選択されている場合：入力欄・ボタンを有効化して数値を反映
+      if (this.posXInput) {
+        this.posXInput.disabled = false;
+        if (document.activeElement !== this.posXInput) this.posXInput.value = pos.x;
       }
-      if (this.posYInput && document.activeElement !== this.posYInput) {
-        this.posYInput.value = pos.y;
+      if (this.posYInput) {
+        this.posYInput.disabled = false;
+        if (document.activeElement !== this.posYInput) this.posYInput.value = pos.y;
       }
+      dpadButtons.forEach(btn => { if(btn) btn.disabled = false; });
     } else {
-      this.posControlPanel.style.display = 'none';
+      // 選択されていない場合：空欄にして無効化
+      if (this.posXInput) {
+        this.posXInput.value = '';
+        this.posXInput.disabled = true;
+      }
+      if (this.posYInput) {
+        this.posYInput.value = '';
+        this.posYInput.disabled = true;
+      }
+      dpadButtons.forEach(btn => { if(btn) btn.disabled = true; });
     }
   }
 
