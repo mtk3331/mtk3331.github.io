@@ -37,6 +37,15 @@ class ImageGenerator {
     this.downloadBtn = document.getElementById('downloadBtn');
     this.exportCoordsBtn = document.getElementById('exportCoordsBtn');
 
+    // 位置調整用UI要素
+    this.posControlPanel = document.getElementById('positionControlPanel');
+    this.posXInput = document.getElementById('posXInput');
+    this.posYInput = document.getElementById('posYInput');
+    this.btnUp = document.getElementById('btnUp');
+    this.btnDown = document.getElementById('btnDown');
+    this.btnLeft = document.getElementById('btnLeft');
+    this.btnRight = document.getElementById('btnRight');
+
     this.imageCache = {};
     this.storageKey = 'image_generator_saved_data';
     
@@ -651,10 +660,92 @@ setupPattern1UI() {
     reader.readAsDataURL(file);
   }
 
+  // 選択中の要素の現在座標を取得
+getSelectedPosition() {
+    if (!this.selectedTarget) return null;
+    const layout = layouts[this.layoutSelect.value];
+    const { type, index } = this.selectedTarget;
+
+    if (type === 'userImage') {
+      return { x: this.uploadedImagePos.x, y: this.uploadedImagePos.y };
+    } else if (type === 'text' && layout.textPositions[index]) {
+      return { x: layout.textPositions[index].x, y: layout.textPositions[index].y };
+    } else if (type === 'p1' && layout.p1Positions[index]) {
+      return { x: layout.p1Positions[index].x, y: layout.p1Positions[index].y };
+    } else if (type === 'p2' && layout.p2Positions[index]) {
+      return { x: layout.p2Positions[index].xMin, y: layout.p2Positions[index].y };
+    } else if (type === 'p4' && layout.p4Positions[index]) {
+      return { x: layout.p4Positions[index].x, y: layout.p4Positions[index].y };
+    }
+    return null;
+  }
+
+  updateSelectedPosition(x, y) {
+    if (!this.selectedTarget) return;
+    const layout = layouts[this.layoutSelect.value];
+    const { type, index } = this.selectedTarget;
+
+    if (type === 'userImage') {
+      if (x !== null) this.uploadedImagePos.x = x;
+      if (y !== null) this.uploadedImagePos.y = y;
+    } else if (type === 'text' && layout.textPositions[index]) {
+      if (x !== null) layout.textPositions[index].x = x;
+      if (y !== null) layout.textPositions[index].y = y;
+    } else if (type === 'p1' && layout.p1Positions[index]) {
+      if (x !== null) layout.p1Positions[index].x = x;
+      if (y !== null) layout.p1Positions[index].y = y;
+    } else if (type === 'p2' && layout.p2Positions[index]) {
+      if (x !== null) {
+        const width = layout.p2Positions[index].xMax - layout.p2Positions[index].xMin;
+        layout.p2Positions[index].xMin = x;
+        layout.p2Positions[index].xMax = x + width;
+      }
+      if (y !== null) layout.p2Positions[index].y = y;
+    } else if (type === 'p4' && layout.p4Positions[index]) {
+      if (x !== null) layout.p4Positions[index].x = x;
+      if (y !== null) layout.p4Positions[index].y = y;
+    }
+  }
+
+  updatePosControlUI() {
+    if (!this.posControlPanel) return;
+    const pos = this.getSelectedPosition();
+    if (pos) {
+      this.posControlPanel.style.display = 'block';
+      if (this.posXInput && document.activeElement !== this.posXInput) {
+        this.posXInput.value = pos.x;
+      }
+      if (this.posYInput && document.activeElement !== this.posYInput) {
+        this.posYInput.value = pos.y;
+      }
+    } else {
+      this.posControlPanel.style.display = 'none';
+    }
+  }
+
+  moveSelected(dx, dy) {
+    const pos = this.getSelectedPosition();
+    if (!pos) return;
+    this.updateSelectedPosition(pos.x + dx, pos.y + dy);
+    this.updatePosControlUI();
+    this.render();
+  }
+
+  setPosSelected(x, y) {
+    const pos = this.getSelectedPosition();
+    if (!pos) return;
+    const newX = x !== null && !isNaN(x) ? x : pos.x;
+    const newY = y !== null && !isNaN(y) ? y : pos.y;
+    this.updateSelectedPosition(newX, newY);
+    this.updatePosControlUI();
+    this.render();
+  }
+
   attachEvents() {
     this.layoutSelect?.addEventListener('change', () => {
       this.selectedTarget = null;
       this.textValues = []; // レイアウト変更時にテキスト保持状態をリセット
+      this.updatePosControlUI();
       this.setupDesignOptions();
       this.setupLayoutConfig();
       this.setupTextInputs();
@@ -743,6 +834,59 @@ setupPattern1UI() {
     this.exportCoordsBtn?.addEventListener('click', () => {
       this.exportCoordinates();
     });
+    let moveInterval = null;
+    let moveTimeout = null;
+
+    const startMove = (dx, dy, e) => {
+      if (e && e.type === 'touchstart') e.preventDefault(); 
+      const multiplier = (e && e.shiftKey) ? 10 : 1;
+      this.moveSelected(dx * multiplier, dy * multiplier);
+
+      moveTimeout = setTimeout(() => {
+        moveInterval = setInterval(() => {
+          this.moveSelected(dx * multiplier, dy * multiplier);
+        }, 50);
+      }, 300);
+    };
+
+    const stopMove = () => {
+      clearTimeout(moveTimeout);
+      clearInterval(moveInterval);
+    };
+
+    const attachDpadEvent = (btn, dx, dy) => {
+      if (!btn) return;
+      btn.addEventListener('mousedown', (e) => startMove(dx, dy, e));
+      btn.addEventListener('mouseup', stopMove);
+      btn.addEventListener('mouseleave', stopMove);
+      btn.addEventListener('touchstart', (e) => startMove(dx, dy, e), { passive: false });
+      btn.addEventListener('touchend', stopMove);
+      btn.addEventListener('touchcancel', stopMove);
+      btn.addEventListener('contextmenu', (e) => e.preventDefault()); 
+    };
+
+    attachDpadEvent(this.btnUp, 0, -1);
+    attachDpadEvent(this.btnDown, 0, 1);
+    attachDpadEvent(this.btnLeft, -1, 0);
+    attachDpadEvent(this.btnRight, 1, 0);
+
+    this.posXInput?.addEventListener('input', (e) => this.setPosSelected(parseInt(e.target.value, 10), null));
+    this.posYInput?.addEventListener('input', (e) => this.setPosSelected(null, parseInt(e.target.value, 10)));
+    
+    // 十字キーによる位置調整イベント
+    const handleMove = (dx, dy, e) => {
+      const multiplier = e.shiftKey ? 10 : 1; // Shiftキーを押しながらだと大きく移動
+      this.moveSelected(dx * multiplier, dy * multiplier);
+    };
+
+    this.btnUp?.addEventListener('click', (e) => handleMove(0, -1, e));
+    this.btnDown?.addEventListener('click', (e) => handleMove(0, 1, e));
+    this.btnLeft?.addEventListener('click', (e) => handleMove(-1, 0, e));
+    this.btnRight?.addEventListener('click', (e) => handleMove(1, 0, e));
+
+    // 座標直接入力のイベント
+    this.posXInput?.addEventListener('input', (e) => this.setPosSelected(parseInt(e.target.value, 10), null));
+    this.posYInput?.addEventListener('input', (e) => this.setPosSelected(null, parseInt(e.target.value, 10)));
   }
 
   isTargetActive(type, index = null) {
@@ -835,6 +979,7 @@ setupPattern1UI() {
           this.dragOffsetX = pt.x - layout.textPositions[tIdx].x;
           this.dragOffsetY = pt.y - layout.textPositions[tIdx].y;
           this.canvas.style.cursor = 'grabbing';
+          this.updatePosControlUI();
           this.render();
           return;
         }
@@ -887,6 +1032,7 @@ setupPattern1UI() {
       }
 
       this.selectedTarget = null;
+      this.updatePosControlUI();
       this.render();
     });
 
@@ -914,6 +1060,7 @@ setupPattern1UI() {
           layout.p4Positions[index].x = Math.round(pt.x - this.dragOffsetX);
           layout.p4Positions[index].y = Math.round(pt.y - this.dragOffsetY);
         }
+        this.updatePosControlUI();
         this.render();
       } else {
         let isHover = false;
