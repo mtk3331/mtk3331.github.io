@@ -347,3 +347,126 @@ button.outline.contrast:hover {
   background-color: #fef2f2;
   border-color: #dc2626;
 }
+
+/* ==================================================
+   8. 位置調整パネル（十字キー・座標入力）
+   ================================================== */
+.position-controls-container {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.d-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 4px;
+}
+
+.d-pad button {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  /* スマホでのタップハイライトを調整 */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.d-pad button:hover,
+.d-pad button:active {
+  background-color: #e2e8f0;
+}
+
+/* グリッドでの十字配置 */
+.d-pad #btnUp { grid-column: 2; grid-row: 1; }
+.d-pad #btnLeft { grid-column: 1; grid-row: 2; }
+.d-pad #btnRight { grid-column: 3; grid-row: 2; }
+.d-pad #btnDown { grid-column: 2; grid-row: 3; }
+
+/* ==================================================
+   8. 位置調整パネル（画像レイアウト準拠）
+   ================================================== */
+.position-controls-container {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 全体を中央寄せ */
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+/* 十字キー部分 */
+.d-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 40px);
+  grid-template-rows: repeat(3, 40px);
+  gap: 6px;
+}
+
+.d-pad button {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  background-color: #0284c7; /* 青色 */
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  user-select: none; /* 長押し時のテキスト選択を防止 */
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.d-pad button:hover,
+.d-pad button:active {
+  background-color: #0369a1;
+}
+
+/* グリッドでの十字配置 */
+.d-pad #btnUp { grid-column: 2; grid-row: 1; }
+.d-pad #btnLeft { grid-column: 1; grid-row: 2; }
+.d-pad #btnRight { grid-column: 3; grid-row: 2; }
+.d-pad #btnDown { grid-column: 2; grid-row: 3; }
+
+/* 座標パネル（右側） */
+.coords-panel {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #e2e8f0; /* 区切り線 */
+  padding-left: 2rem;
+}
+
+.coords-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+}
+
+.coords-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.coords-inputs label {
+  margin: 0;
+  font-weight: 600;
+  color: #475569;
+}
+
+.coords-inputs input[type="number"] {
+  width: 80px !important; /* 幅を固定 */
+  margin: 0 !important;
+  padding: 0.35rem 0.5rem;
+  margin-right: 0.5rem !important;
+}
