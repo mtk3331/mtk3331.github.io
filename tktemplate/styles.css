@@ -392,22 +392,23 @@ button.outline.contrast:hover {
 .d-pad #btnDown { grid-column: 2; grid-row: 3; }
 
 /* ==================================================
-   8. 位置調整パネル（画像レイアウト準拠）
+   8. 位置調整パネル（1行表示・常時表示対応）
    ================================================== */
 .position-controls-container {
   display: flex;
   align-items: center;
-  justify-content: center; /* 全体を中央寄せ */
-  gap: 2rem;
-  padding: 1rem 0;
+  justify-content: center; /* 中央寄せ */
+  gap: 1.5rem; /* 間隔を少し詰める */
+  padding: 0.5rem 0;
+  flex-wrap: nowrap; /* 改行防止 */
 }
 
-/* 十字キー部分 */
+/* 十字キー部分（サイズを少し小さく調整） */
 .d-pad {
   display: grid;
-  grid-template-columns: repeat(3, 40px);
-  grid-template-rows: repeat(3, 40px);
-  gap: 6px;
+  grid-template-columns: repeat(3, 36px);
+  grid-template-rows: repeat(3, 36px);
+  gap: 4px;
 }
 
 .d-pad button {
@@ -416,19 +417,26 @@ button.outline.contrast:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  background-color: #0284c7; /* 青色 */
+  font-size: 1rem;
+  background-color: #0284c7;
   color: #ffffff;
   border: none;
   border-radius: 6px;
-  user-select: none; /* 長押し時のテキスト選択を防止 */
+  user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-.d-pad button:hover,
-.d-pad button:active {
+.d-pad button:hover:not(:disabled),
+.d-pad button:active:not(:disabled) {
   background-color: #0369a1;
+}
+
+/* 無効化時のスタイル */
+.d-pad button:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 /* グリッドでの十字配置 */
@@ -440,16 +448,9 @@ button.outline.contrast:hover {
 /* 座標パネル（右側） */
 .coords-panel {
   display: flex;
-  flex-direction: column;
-  border-left: 1px solid #e2e8f0; /* 区切り線 */
-  padding-left: 2rem;
-}
-
-.coords-title {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #1e293b;
-  margin-bottom: 0.75rem;
+  align-items: center;
+  border-left: 1px solid #e2e8f0;
+  padding-left: 1.5rem; /* 区切り線との間隔 */
 }
 
 .coords-inputs {
@@ -465,8 +466,12 @@ button.outline.contrast:hover {
 }
 
 .coords-inputs input[type="number"] {
-  width: 80px !important; /* 幅を固定 */
+  width: 75px !important; /* 横幅を縮小 */
   margin: 0 !important;
   padding: 0.35rem 0.5rem;
-  margin-right: 0.5rem !important;
+}
+
+.coords-inputs input[type="number"]:disabled {
+  background-color: #f1f5f9 !important;
+  cursor: not-allowed;
 }
