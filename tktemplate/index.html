@@ -172,9 +172,35 @@
 
       <!-- プレビュー表示 -->
       <section>
-        <label>プレビュー（PCのみドラッグで位置を調整可能、スマホは調整不可）</label>
+        <label>プレビュー（ドラッグで位置を調整できます）</label>
         <div class="canvas-wrapper">
           <canvas id="previewCanvas" width="800" height="600"></canvas>
+        </div>
+
+        <!-- ▼▼ 追加: 位置調整パネル ▼▼ -->
+        <div id="positionControlPanel" style="display: none; margin-top: 1rem;">
+          <div class="position-controls-container">
+            
+            <!-- 左側：方向キー -->
+            <div class="d-pad">
+              <button type="button" id="btnUp" title="上へ移動">▲</button>
+              <button type="button" id="btnLeft" title="左へ移動">◀</button>
+              <button type="button" id="btnRight" title="右へ移動">▶</button>
+              <button type="button" id="btnDown" title="下へ移動">▼</button>
+            </div>
+
+            <!-- 右側：座標入力 -->
+            <div class="coords-panel">
+              <div class="coords-title">選択中の要素の位置調整</div>
+              <div class="coords-inputs">
+                <label for="posXInput">X:</label>
+                <input type="number" id="posXInput">
+                <label for="posYInput">Y:</label>
+                <input type="number" id="posYInput">
+              </div>
+            </div>
+
+          </div>
         </div>
       </section>
 
